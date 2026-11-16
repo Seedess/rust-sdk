@@ -1,0 +1,20 @@
+[package]
+name = "seedess-sdk"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Official Seedess SDK for Rust. Create streams, mint playback tokens, read offload metrics."
+repository = "https://github.com/Seedess/rust-sdk"
+homepage = "https://seedess.com/docs/libraries/"
+keywords = ["seedess", "sdk", "video", "streaming", "p2p"]
+categories = ["api-bindings", "web-programming"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "1"
+ureq = { version = "2.10", features = ["json"] }
+percent-encoding = "2"
+
+[dev-dependencies]
+httpmock = "0.7"
