@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Seedess Rust SDK example</title>
+    <style>
+      :root { color-scheme: dark; }
+      body {
+        margin: 0;
+        background: #070b14;
+        color: #eef4ff;
+        font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+      }
+      main { max-width: 860px; margin: 0 auto; padding: 48px 24px; }
+      h1 { font-size: 1.6rem; margin: 0 0 8px; }
+      p { color: #93a4bd; margin: 0 0 20px; }
+      video { width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: 12px; }
+      pre {
+        margin-top: 20px;
+        padding: 16px;
+        border: 1px solid rgba(140, 170, 210, 0.16);
+        border-radius: 12px;
+        background: #04070d;
+        color: #8df0c8;
+        font-size: 12px;
+        overflow: auto;
+      }
+      .status { color: #57d7ff; }
+      .error { color: #ff9c9c; }
+      code { color: #a9bad1; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Seedess Rust SDK example</h1>
+      <p>
+        The server calls <code>createStream()</code> and hands the page a public token and
+        playback URLs. The page attaches the P2P adapter to an hls.js player.
+      </p>
+
+      <video id="video" controls playsinline></video>
+      <p id="status" class="status">Loading…</p>
+      <pre id="stats" hidden></pre>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+    <script type="module">
+      import { createPlayer } from 'https://seedess.com/p2p.js';
+
+      const video = document.getElementById('video');
+      const status = document.getElementById('status');
+      const stats = document.getElementById('stats');
+
+      try {
+        const data = await fetch('/api/seedess').then((response) => response.json());
+        if (!data.ok) throw new Error(data.error || 'Could not create the stream');
+
+        status.textContent = `Stream ${data.stream} — connecting…`;
+
+        const player = await createPlayer(video, data.playback.master, {
+          room: data.stream,
+          signalingUrl: data.playback.signaling,
+          configUrl: data.playback.config,
+        });
+
+        status.textContent = `Stream ${data.stream} — playing`;
+        stats.hidden = false;
+        player.on('stats', (value) => {
+          stats.textContent = JSON.stringify(value, null, 2);
+        });
+      } catch (error) {
+        status.className = 'error';
+        status.textContent = error.message;
+      }
+    </script>
+  </body>
+</html>
